@@ -38,7 +38,7 @@ async def getProtectedAndPrivateFromQbit(settingsDict):
 
         for qbitItem in qbitItems:
             # Fetch protected torrents (by tag)
-            if settingsDict['NO_STALLED_REMOVAL_QBIT_TAG'] in qbitItem.get('tags'):
+            if settingsDict['NO_STALLED_REMOVAL_QBIT_TAG'] and settingsDict['NO_STALLED_REMOVAL_QBIT_TAG'] in qbitItem.get('tags'):
                 protectedDownloadIDs.append(str.upper(qbitItem['hash']))
                 
             # Fetch private torrents
@@ -99,7 +99,8 @@ def showSettings(settingsDict):
         logger.info('Minimum speed enforced: %s KB/s', str(settingsDict['MIN_DOWNLOAD_SPEED'])) 
     logger.info('Permitted number of times before stalled/missing metadata/slow downloads are removed: %s', str(settingsDict['PERMITTED_ATTEMPTS']))      
     if settingsDict['QBITTORRENT_URL']: 
-        logger.info('Downloads with this tag will be skipped: \"%s\"', settingsDict['NO_STALLED_REMOVAL_QBIT_TAG'])  
+        if settingsDict['NO_STALLED_REMOVAL_QBIT_TAG']:
+            logger.info('Downloads with this tag will be skipped: \"%s\"', settingsDict['NO_STALLED_REMOVAL_QBIT_TAG'])  
         logger.info('Private Trackers will be skipped: %s', settingsDict['IGNORE_PRIVATE_TRACKERS'])        
     
     logger.info('') 
@@ -223,7 +224,7 @@ async def instanceChecks(settingsDict):
 
 async def createQbitProtectionTag(settingsDict):
     # Creates the qBit Protection tag if not already present
-    if settingsDict['QBITTORRENT_URL']:
+    if settingsDict['QBITTORRENT_URL'] and settingsDict['NO_STALLED_REMOVAL_QBIT_TAG']:
         current_tags = await rest_get(settingsDict['QBITTORRENT_URL']+'/torrents/tags',cookies=settingsDict['QBIT_COOKIE'])
         if not settingsDict['NO_STALLED_REMOVAL_QBIT_TAG'] in current_tags:
             if settingsDict['QBITTORRENT_URL']: 
